@@ -16,6 +16,7 @@ import type {
   DealSummary,
   DiscountQuote,
   HealthSnapshot,
+  ProductBom,
   Region,
   ServerProduct,
   StakeholderRole,
@@ -47,7 +48,11 @@ async function extractErrorMessage(res: Response): Promise<string> {
   return `${res.status} ${res.statusText}`;
 }
 
-async function request<T>(path: string, init: RequestInit | undefined, fallback: () => T): Promise<T> {
+async function request<T>(
+  path: string,
+  init: RequestInit | undefined,
+  fallback: () => T,
+): Promise<T> {
   let res: Response;
   try {
     const controller = new AbortController();
@@ -74,8 +79,18 @@ async function request<T>(path: string, init: RequestInit | undefined, fallback:
 export const api = {
   listProducts: () => request<ServerProduct[]>("/products", undefined, () => PRODUCTS),
 
+  getProductBom: (productId: string) =>
+    request<ProductBom>(`/products/${productId}/bom`, undefined, backendRequired),
+
+  // /health/metrics doesn't exist on the backend yet — real telemetry wiring
+  // is a later phase. request() now surfaces real 4xx/5xx errors rather than
+  // papering over them (deals/quotes need that), but this endpoint's 404 is
+  // "not built yet," not a business error — so unlike the other calls, this
+  // one always falls back to mock telemetry, never throws.
   getHealth: () =>
-    request<HealthSnapshot>("/health/metrics", undefined, () => buildHealthSnapshot(Date.now())),
+    request<HealthSnapshot>("/health/metrics", undefined, () =>
+      buildHealthSnapshot(Date.now()),
+    ).catch(() => buildHealthSnapshot(Date.now())),
 
   quote: (payload: {
     productId: string;
@@ -124,7 +139,12 @@ export const api = {
   revertDealStage: (id: string) =>
     request<Deal>(`/deals/${id}/stage/revert`, { method: "POST" }, backendRequired),
 
-  signoffStakeholder: (id: string, role: StakeholderRole, status: StakeholderStatus, actor?: string) =>
+  signoffStakeholder: (
+    id: string,
+    role: StakeholderRole,
+    status: StakeholderStatus,
+    actor?: string,
+  ) =>
     request<Deal>(
       `/deals/${id}/stakeholders/${role}/signoff`,
       { method: "POST", body: JSON.stringify({ status, actor }) },
@@ -133,9 +153,18 @@ export const api = {
 
   addBomItem: (
     id: string,
-    payload: { productId: string; quantity: number; termMonths: 12 | 24 | 36; segment: CustomerSegment },
+    payload: {
+      productId: string;
+      quantity: number;
+      termMonths: 12 | 24 | 36;
+      segment: CustomerSegment;
+    },
   ) =>
-    request<Deal>(`/deals/${id}/bom`, { method: "POST", body: JSON.stringify(payload) }, backendRequired),
+    request<Deal>(
+      `/deals/${id}/bom`,
+      { method: "POST", body: JSON.stringify(payload) },
+      backendRequired,
+    ),
 
   removeBomItem: (id: string, itemId: string) =>
     request<Deal>(`/deals/${id}/bom/${itemId}`, { method: "DELETE" }, backendRequired),
@@ -151,4 +180,5 @@ export const queryKeys = {
   quote: (p: unknown) => ["quote", p] as const,
   deals: (filters: unknown) => ["deals", filters] as const,
   deal: (id: string) => ["deal", id] as const,
+  productBom: (productId: string) => ["product-bom", productId] as const,
 };

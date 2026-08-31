@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Activity, Briefcase, LayoutGrid, LifeBuoy, Server, Settings2 } from "lucide-react";
 import type { ReactNode } from "react";
+import { RoleSwitcher } from "@/components/role-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <ThemeToggle />
+        </div>
+
+        <div className="px-3 pb-3">
+          <RoleSwitcher className="h-9 w-full gap-2 border-sidebar-border bg-sidebar-accent/40 text-[0.75rem] text-sidebar-foreground" />
         </div>
 
         <nav className="flex-1 space-y-6 px-3 py-4">
@@ -115,6 +120,11 @@ export function PageHeader({
           {meta}
           {actions}
         </div>
+      </div>
+      {/* Sidebar carries the switcher on lg+; below that the sidebar is
+          hidden entirely, so it needs a home here too. */}
+      <div className="px-6 pb-3 lg:hidden">
+        <RoleSwitcher className="h-8 w-full max-w-xs gap-2 border-border bg-surface-muted text-[0.75rem]" />
       </div>
       {tabs && <ViewTabs />}
     </header>

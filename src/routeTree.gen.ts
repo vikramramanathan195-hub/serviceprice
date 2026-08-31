@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as BomProductIdRouteImport } from './routes/bom/$productId'
 import { Route as DealsDealIdRouteImport } from './routes/deals/$dealId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const HealthRoute = HealthRouteImport.update({
   path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BomProductIdRoute = BomProductIdRouteImport.update({
+  id: '/bom/$productId',
+  path: '/bom/$productId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DealsDealIdRoute = DealsDealIdRouteImport.update({
   id: '/deals/$dealId',
   path: '/deals/$dealId',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
   '/health': typeof HealthRoute
+  '/bom/$productId': typeof BomProductIdRoute
   '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
   '/health': typeof HealthRoute
+  '/bom/$productId': typeof BomProductIdRoute
   '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,28 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
   '/health': typeof HealthRoute
+  '/bom/$productId': typeof BomProductIdRoute
   '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catalog' | '/health' | '/deals/$dealId'
+  fullPaths: '/' | '/catalog' | '/health' | '/bom/$productId' | '/deals/$dealId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catalog' | '/health' | '/deals/$dealId'
-  id: '__root__' | '/' | '/catalog' | '/health' | '/deals/$dealId'
+  to: '/' | '/catalog' | '/health' | '/bom/$productId' | '/deals/$dealId'
+  id:
+    | '__root__'
+    | '/'
+    | '/catalog'
+    | '/health'
+    | '/bom/$productId'
+    | '/deals/$dealId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CatalogRoute: typeof CatalogRoute
   HealthRoute: typeof HealthRoute
+  BomProductIdRoute: typeof BomProductIdRoute
   DealsDealIdRoute: typeof DealsDealIdRoute
 }
 
@@ -92,6 +108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bom/$productId': {
+      id: '/bom/$productId'
+      path: '/bom/$productId'
+      fullPath: '/bom/$productId'
+      preLoaderRoute: typeof BomProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/deals/$dealId': {
       id: '/deals/$dealId'
       path: '/deals/$dealId'
@@ -106,6 +129,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CatalogRoute: CatalogRoute,
   HealthRoute: HealthRoute,
+  BomProductIdRoute: BomProductIdRoute,
   DealsDealIdRoute: DealsDealIdRoute,
 }
 export const routeTree = rootRouteImport

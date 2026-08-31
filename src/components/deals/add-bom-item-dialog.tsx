@@ -11,7 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api, queryKeys } from "@/lib/serverprice/api";
 import { SEGMENT_LABELS } from "@/lib/serverprice/data";
 import { productsQueryOptions } from "@/lib/serverprice/queries";
@@ -91,7 +97,9 @@ export function AddBomItemDialog({
                 ))}
               </SelectContent>
             </Select>
-            {touched && errors.product && <p className="text-[0.75rem] text-destructive">{errors.product}</p>}
+            {touched && errors.product && (
+              <p className="text-[0.75rem] text-destructive">{errors.product}</p>
+            )}
             {product && (
               <p className="text-meta">
                 ${product.basePrice.toLocaleString()}/mo list · {product.availability}
@@ -114,7 +122,10 @@ export function AddBomItemDialog({
             </div>
             <div className="space-y-1.5">
               <Label>Term</Label>
-              <Select value={String(termMonths)} onValueChange={(v) => setTermMonths(Number(v) as 12 | 24 | 36)}>
+              <Select
+                value={String(termMonths)}
+                onValueChange={(v) => setTermMonths(Number(v) as 12 | 24 | 36)}
+              >
                 <SelectTrigger className="h-9 text-[0.8125rem]">
                   <SelectValue />
                 </SelectTrigger>
@@ -143,12 +154,16 @@ export function AddBomItemDialog({
                 ))}
               </SelectContent>
             </Select>
-            {touched && errors.segment && <p className="text-[0.75rem] text-destructive">{errors.segment}</p>}
+            {touched && errors.segment && (
+              <p className="text-[0.75rem] text-destructive">{errors.segment}</p>
+            )}
           </div>
 
           {mutation.isError && (
             <p className="text-[0.75rem] text-destructive">
-              {mutation.error instanceof Error ? mutation.error.message : "Could not add this line item."}
+              {mutation.error instanceof Error
+                ? mutation.error.message
+                : "Could not add this line item."}
             </p>
           )}
         </div>

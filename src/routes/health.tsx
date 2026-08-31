@@ -24,6 +24,7 @@ import {
   YAxis,
 } from "recharts";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { RoleGate } from "@/components/role-gate";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { healthQueryOptions } from "@/lib/serverprice/queries";
@@ -86,11 +87,16 @@ function HealthPage() {
           </button>
         }
       />
-      <main className="mx-auto w-full max-w-[1500px] flex-1 px-6 py-6 lg:px-8">
-        <Suspense fallback={<HealthSkeleton />}>
-          <HealthContent />
-        </Suspense>
-      </main>
+      <RoleGate
+        blockedFor={["external-partner"]}
+        reason="External partners see manufacturing cost and lead time for their own component only — not internal platform telemetry."
+      >
+        <main className="mx-auto w-full max-w-[1500px] flex-1 px-6 py-6 lg:px-8">
+          <Suspense fallback={<HealthSkeleton />}>
+            <HealthContent />
+          </Suspense>
+        </main>
+      </RoleGate>
     </AppShell>
   );
 }

@@ -30,7 +30,9 @@ export function ThemeToggle({ className }: { className?: string }) {
         onClick={() => isDark && toggle()}
         className={cn(
           "focus-ring relative z-10 flex size-6 items-center justify-center rounded-full transition-colors",
-          !isDark ? "text-sidebar-primary" : "text-sidebar-foreground/40 hover:text-sidebar-foreground/70",
+          !isDark
+            ? "text-sidebar-primary"
+            : "text-sidebar-foreground/40 hover:text-sidebar-foreground/70",
         )}
       >
         <Sun className="size-3.5" strokeWidth={2.25} />
@@ -43,7 +45,9 @@ export function ThemeToggle({ className }: { className?: string }) {
         onClick={() => !isDark && toggle()}
         className={cn(
           "focus-ring relative z-10 flex size-6 items-center justify-center rounded-full transition-colors",
-          isDark ? "text-sidebar-primary" : "text-sidebar-foreground/40 hover:text-sidebar-foreground/70",
+          isDark
+            ? "text-sidebar-primary"
+            : "text-sidebar-foreground/40 hover:text-sidebar-foreground/70",
         )}
       >
         <Moon className="size-3.5" strokeWidth={2.25} />

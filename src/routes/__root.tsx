@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { ViewRoleProvider } from "@/hooks/use-view-role";
 
 function NotFoundComponent() {
   return (
@@ -136,11 +137,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={150}>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="bottom-right" richColors closeButton />
-      </TooltipProvider>
+      <ViewRoleProvider>
+        <TooltipProvider delayDuration={150}>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <Toaster position="bottom-right" richColors closeButton />
+        </TooltipProvider>
+      </ViewRoleProvider>
     </QueryClientProvider>
   );
 }

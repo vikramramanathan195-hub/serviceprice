@@ -7,6 +7,7 @@ import {
   ChevronRight,
   FileText,
   Info,
+  Lock,
   Minus,
   ShieldCheck,
   X,
@@ -29,6 +30,7 @@ import type { CustomerSegment, DiscountQuote, ServerProduct } from "@/lib/server
 import { RackLoader, RackMark } from "@/components/rack-mark";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useDialogTrigger } from "@/hooks/use-dialog-trigger";
+import { useViewRole } from "@/hooks/use-view-role";
 import { cn } from "@/lib/utils";
 import { ExportQuoteDialog } from "./export-quote-dialog";
 
@@ -62,6 +64,8 @@ export function DiscountCalculator({ products }: { products: ServerProduct[] }) 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [quote, setQuote] = useState<DiscountQuote | null>(null);
   const exportDialog = useDialogTrigger();
+  const { role } = useViewRole();
+  const readOnly = role === "manufacturing-rd";
 
   const product = products.find((p) => p.id === productId);
 
@@ -108,11 +112,17 @@ export function DiscountCalculator({ products }: { products: ServerProduct[] }) 
             Discount calculator
           </h2>
         </div>
+        {readOnly && (
+          <span className="status-pill ml-auto shrink-0 border-border-strong bg-secondary/60 text-muted-foreground">
+            <Lock className="size-3" strokeWidth={2.5} />
+            Read-only for Manufacturing/R&D
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 divide-y divide-border xl:grid-cols-[minmax(320px,380px)_1fr] xl:divide-x xl:divide-y-0">
         {/* Inputs -------------------------------------------------- */}
-        <div className="space-y-5 p-6">
+        <fieldset disabled={readOnly} className={cn("space-y-5 p-6", readOnly && "opacity-60")}>
           <Field label="Product SKU" error={show("product")} htmlFor="calc-product">
             <div className="flex items-center gap-2">
               <Select
@@ -252,7 +262,7 @@ export function DiscountCalculator({ products }: { products: ServerProduct[] }) 
 
           <Button
             onClick={submit}
-            disabled={mutation.isPending || !isValid}
+            disabled={mutation.isPending || !isValid || readOnly}
             aria-describedby="calc-submit-hint"
             className="h-9 w-full text-[0.8125rem] font-medium transition-all active:scale-[0.99]"
           >
@@ -260,11 +270,13 @@ export function DiscountCalculator({ products }: { products: ServerProduct[] }) 
             <ChevronRight className="size-4" aria-hidden="true" />
           </Button>
           <p id="calc-submit-hint" className="text-[0.75rem] text-muted-foreground">
-            {isValid
-              ? "All required fields are valid."
-              : "Fix the highlighted fields above to enable calculation."}
+            {readOnly
+              ? "Manufacturing/R&D has read-only pricing access — switch roles to run a calculation."
+              : isValid
+                ? "All required fields are valid."
+                : "Fix the highlighted fields above to enable calculation."}
           </p>
-        </div>
+        </fieldset>
 
         {/* Result -------------------------------------------------- */}
         <div

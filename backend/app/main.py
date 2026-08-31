@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.component_data import COMPONENTS_BY_PRODUCT
 from app.data import PRODUCTS, PRODUCTS_BY_ID
 from app.deals_data import DEALS_BY_ID
 from app.discount import calculate_discount
@@ -16,6 +17,7 @@ from app.models import (
     DealStage,
     DealSummary,
     DiscountQuote,
+    ProductBom,
     QuoteRequest,
     Region,
     ServerProduct,
@@ -185,6 +187,27 @@ async def calculate_quote(req: QuoteRequest) -> DiscountQuote:
     if product is None:
         raise HTTPException(status_code=404, detail=f"No product found with id '{req.productId}'")
     return calculate_discount(product, req)
+
+
+@app.get("/products/{product_id}/bom", response_model=ProductBom)
+async def get_product_bom(product_id: str) -> ProductBom:
+    product = PRODUCTS_BY_ID.get(product_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail=f"No product found with id '{product_id}'")
+    components = COMPONENTS_BY_PRODUCT.get(product_id, [])
+    total_cost = sum(c.unitCost * c.quantity for c in components)
+    margin_usd = product.basePrice - total_cost
+    margin_percent = (margin_usd / product.basePrice * 100) if product.basePrice else 0.0
+    return ProductBom(
+        productId=product.id,
+        productName=product.name,
+        sku=product.sku,
+        basePrice=product.basePrice,
+        components=components,
+        totalBomCost=round(total_cost, 2),
+        marginUsd=round(margin_usd, 2),
+        marginPercent=round(margin_percent, 1),
+    )
 
 
 # --------------------------------------------------------------------------

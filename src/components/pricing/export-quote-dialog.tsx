@@ -65,8 +65,8 @@ export function ExportQuoteDialog({
             Finalize and export quote
           </DialogTitle>
           <DialogDescription className="mt-1 text-[0.8125rem]">
-            This locks the pricing for 30 days and writes an audit entry to the pricing desk log.
-            It cannot be edited afterwards.
+            This locks the pricing for 30 days and writes an audit entry to the pricing desk log. It
+            cannot be edited afterwards.
           </DialogDescription>
         </DialogHeader>
 
@@ -138,15 +138,7 @@ export function ExportQuoteDialog({
   );
 }
 
-function SummaryRow({
-  label,
-  value,
-  strong,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-}) {
+function SummaryRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-6 px-3.5 py-2.5">
       <dt className="text-[0.75rem] text-muted-foreground">{label}</dt>

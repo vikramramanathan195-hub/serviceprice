@@ -16,7 +16,6 @@ export function useDialogTrigger<T extends HTMLElement = HTMLButtonElement>() {
         setTimeout(() => triggerRef.current?.focus(), 120);
       });
     }
-
   }, []);
 
   return { triggerRef, open, setOpen, onOpenChange };

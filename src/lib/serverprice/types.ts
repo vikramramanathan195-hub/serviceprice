@@ -114,6 +114,29 @@ export interface TimelineEvent {
   actor: string | null;
 }
 
+// Manufacturing BOM — physical components behind a SKU, distinct from a
+// Deal's Bill of Materials (customer-facing SKUs + pricing).
+export interface BomComponent {
+  id: string;
+  name: string;
+  category: string;
+  supplier: string;
+  unitCost: number;
+  quantity: number;
+  leadTimeDays: number;
+}
+
+export interface ProductBom {
+  productId: string;
+  productName: string;
+  sku: string;
+  basePrice: number;
+  components: BomComponent[];
+  totalBomCost: number;
+  marginUsd: number;
+  marginPercent: number;
+}
+
 export interface DealSummary {
   id: string;
   name: string;

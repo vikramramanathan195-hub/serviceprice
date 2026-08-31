@@ -17,7 +17,9 @@ export const healthQueryOptions = () =>
     staleTime: 0,
   });
 
-export const dealsQueryOptions = (filters: { stage?: DealStage; region?: Region; search?: string } = {}) =>
+export const dealsQueryOptions = (
+  filters: { stage?: DealStage; region?: Region; search?: string } = {},
+) =>
   queryOptions({
     queryKey: queryKeys.deals(filters),
     queryFn: () => api.listDeals(filters),
@@ -29,4 +31,11 @@ export const dealQueryOptions = (id: string) =>
     queryKey: queryKeys.deal(id),
     queryFn: () => api.getDeal(id),
     staleTime: 5_000,
+  });
+
+export const productBomQueryOptions = (productId: string) =>
+  queryOptions({
+    queryKey: queryKeys.productBom(productId),
+    queryFn: () => api.getProductBom(productId),
+    staleTime: 60_000,
   });

@@ -64,7 +64,11 @@ export function ExportCatalogDialog({
         </div>
 
         <DialogFooter className="gap-2 border-t border-border bg-surface-muted/60 px-6 py-4">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="h-9 text-[0.8125rem]">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="h-9 text-[0.8125rem]"
+          >
             Cancel
           </Button>
           <Button onClick={confirm} disabled={pending} className="h-9 gap-2 text-[0.8125rem]">

@@ -48,6 +48,34 @@ class ConfidenceFactor(BaseModel):
     direction: Literal["up", "down"]
 
 
+# --------------------------------------------------------------------------
+# Manufacturing BOM — physical components that build one unit of a product.
+# Distinct from a Deal's "Bill of materials" (which is SKUs + pricing sold
+# to a customer): this is what it costs the company to build the SKU.
+# --------------------------------------------------------------------------
+
+
+class BomComponent(BaseModel):
+    id: str
+    name: str
+    category: str
+    supplier: str
+    unitCost: float
+    quantity: int
+    leadTimeDays: int
+
+
+class ProductBom(BaseModel):
+    productId: str
+    productName: str
+    sku: str
+    basePrice: float
+    components: list[BomComponent]
+    totalBomCost: float
+    marginUsd: float
+    marginPercent: float
+
+
 class DiscountQuote(BaseModel):
     productId: str
     segment: CustomerSegment

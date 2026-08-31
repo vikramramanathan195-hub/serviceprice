@@ -3,6 +3,7 @@ import { useDialogTrigger } from "@/hooks/use-dialog-trigger";
 import { useQuery } from "@tanstack/react-query";
 import { CircleDollarSign, Download, Layers, Percent, TrendingUp } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { RoleGate } from "@/components/role-gate";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DiscountCalculator } from "@/components/pricing/discount-calculator";
@@ -11,7 +12,6 @@ import { ProductTable } from "@/components/pricing/product-table";
 import { currency } from "@/lib/serverprice/discount";
 import { productsQueryOptions } from "@/lib/serverprice/queries";
 import { cn } from "@/lib/utils";
-
 
 export const Route = createFileRoute("/catalog")({
   head: () => ({
@@ -45,10 +45,11 @@ function PricingDashboard() {
   const { data: products = [], isLoading } = useQuery(productsQueryOptions());
   const exportDialog = useDialogTrigger();
 
-
   const avgDiscount = products.length
-    ? products.reduce((s, p) => s + p.discountTiers.reduce((m, t) => Math.max(m, t.percent), 0), 0) /
-      products.length
+    ? products.reduce(
+        (s, p) => s + p.discountTiers.reduce((m, t) => Math.max(m, t.percent), 0),
+        0,
+      ) / products.length
     : 0;
   const constrained = products.filter((p) => p.availability !== "in-stock").length;
   const medianPrice = (() => {
@@ -81,43 +82,48 @@ function PricingDashboard() {
         }
       />
 
-      <main className="mx-auto w-full max-w-[1500px] flex-1 space-y-6 px-6 py-6 lg:px-8">
-        <section className="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-label="Catalog summary">
-          <SummaryStat
-            icon={Layers}
-            label="Active SKUs"
-            value={String(products.length)}
-            hint="Published on the Q3 rate card"
-            loading={isLoading}
-          />
-          <SummaryStat
-            icon={CircleDollarSign}
-            label="Median list price"
-            value={currency(medianPrice)}
-            hint="Per unit, per month"
-            loading={isLoading}
-          />
-          <SummaryStat
-            icon={Percent}
-            label="Avg. max discount"
-            value={`${avgDiscount.toFixed(1)}%`}
-            hint="Best published tier per SKU"
-            accent
-            loading={isLoading}
-          />
-          <SummaryStat
-            icon={TrendingUp}
-            label="Supply-constrained"
-            value={`${constrained} SKUs`}
-            hint="Concessions restricted by the pricing desk"
-            loading={isLoading}
-          />
-        </section>
+      <RoleGate
+        blockedFor={["external-partner"]}
+        reason="External partners see manufacturing cost and lead time for their own component only — not the pricing catalog or calculator. Open a product's Manufacturing BOM to see your component."
+      >
+        <main className="mx-auto w-full max-w-[1500px] flex-1 space-y-6 px-6 py-6 lg:px-8">
+          <section className="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-label="Catalog summary">
+            <SummaryStat
+              icon={Layers}
+              label="Active SKUs"
+              value={String(products.length)}
+              hint="Published on the Q3 rate card"
+              loading={isLoading}
+            />
+            <SummaryStat
+              icon={CircleDollarSign}
+              label="Median list price"
+              value={currency(medianPrice)}
+              hint="Per unit, per month"
+              loading={isLoading}
+            />
+            <SummaryStat
+              icon={Percent}
+              label="Avg. max discount"
+              value={`${avgDiscount.toFixed(1)}%`}
+              hint="Best published tier per SKU"
+              accent
+              loading={isLoading}
+            />
+            <SummaryStat
+              icon={TrendingUp}
+              label="Supply-constrained"
+              value={`${constrained} SKUs`}
+              hint="Concessions restricted by the pricing desk"
+              loading={isLoading}
+            />
+          </section>
 
-        <ProductTable products={products} isLoading={isLoading} />
+          <ProductTable products={products} isLoading={isLoading} />
 
-        <DiscountCalculator products={products} />
-      </main>
+          <DiscountCalculator products={products} />
+        </main>
+      </RoleGate>
 
       <ExportCatalogDialog
         open={exportDialog.open}
@@ -168,5 +174,4 @@ function SummaryStat({
       </div>
     </div>
   );
-
 }

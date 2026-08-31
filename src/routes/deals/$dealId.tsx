@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Loader2, Undo2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { RoleGate } from "@/components/role-gate";
+import { RoleSwitcher } from "@/components/role-switcher";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -101,6 +103,9 @@ function DealDetail() {
             <p className="mt-1 text-[0.8125rem] text-muted-foreground">
               {deal.customerName} · {REGION_LABELS[deal.region]}
             </p>
+            <div className="mt-3 lg:hidden">
+              <RoleSwitcher className="h-8 w-full max-w-xs gap-2 border-border bg-surface-muted text-[0.75rem]" />
+            </div>
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-1.5">
@@ -200,36 +205,43 @@ function DealDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <main className="mx-auto w-full max-w-[1500px] flex-1 space-y-8 px-6 py-8 lg:px-8">
-        {/* Hero: BOM total is the one number on this page that should
-            dominate — everything else here is supporting context. */}
-        <section className="surface-hero grid grid-cols-1 gap-6 p-6 sm:grid-cols-[1.4fr_1fr_1fr]">
-          <div>
-            <div className="text-eyebrow text-accent">BOM total ({deal.bom.length} line items)</div>
-            <AnimatedTotal value={bomTotal} />
-            {savingsPercent > 0 && (
-              <p className="mt-1 text-[0.8125rem] text-muted-foreground">
-                <span className="tabular font-medium text-success">
-                  −{savingsPercent.toFixed(1)}%
-                </span>{" "}
-                vs {currency(listTotal)} list
-              </p>
-            )}
+      <RoleGate
+        blockedFor={["external-partner"]}
+        reason="External partners see manufacturing cost and lead time for their own component only — not deal economics or customer terms. Open a product's Manufacturing BOM to see your component."
+      >
+        <main className="mx-auto w-full max-w-[1500px] flex-1 space-y-8 px-6 py-8 lg:px-8">
+          {/* Hero: BOM total is the one number on this page that should
+              dominate — everything else here is supporting context. */}
+          <section className="surface-hero grid grid-cols-1 gap-6 p-6 sm:grid-cols-[1.4fr_1fr_1fr]">
+            <div>
+              <div className="text-eyebrow text-accent">
+                BOM total ({deal.bom.length} line items)
+              </div>
+              <AnimatedTotal value={bomTotal} />
+              {savingsPercent > 0 && (
+                <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+                  <span className="tabular font-medium text-success">
+                    −{savingsPercent.toFixed(1)}%
+                  </span>{" "}
+                  vs {currency(listTotal)} list
+                </p>
+              )}
+            </div>
+            <HeroStat label="Total units" value={totalUnits.toLocaleString("en-US")} />
+            <HeroStat
+              label="Stakeholders cleared"
+              value={`${deal.stakeholders.filter((s) => s.status === "approved" || !s.required).length}/${deal.stakeholders.length}`}
+            />
+          </section>
+
+          <StakeholderPanel deal={deal} />
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr] xl:items-start">
+            <BomLedger deal={deal} />
+            <TimelineFeed events={deal.timeline} />
           </div>
-          <HeroStat label="Total units" value={totalUnits.toLocaleString("en-US")} />
-          <HeroStat
-            label="Stakeholders cleared"
-            value={`${deal.stakeholders.filter((s) => s.status === "approved" || !s.required).length}/${deal.stakeholders.length}`}
-          />
-        </section>
-
-        <StakeholderPanel deal={deal} />
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr] xl:items-start">
-          <BomLedger deal={deal} />
-          <TimelineFeed events={deal.timeline} />
-        </div>
-      </main>
+        </main>
+      </RoleGate>
     </AppShell>
   );
 }

@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowUpDown,
   ChevronDown,
   ChevronUp,
   Columns3,
   GitCompareArrows,
+  ListTree,
   Search,
   SlidersHorizontal,
   X,
@@ -281,6 +283,9 @@ export function ProductTable({
               <th scope="col" className="px-5 py-2.5 text-right text-eyebrow">
                 Availability
               </th>
+              <th scope="col" className="w-10 px-3 py-2.5">
+                <span className="sr-only">Manufacturing BOM</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -288,7 +293,7 @@ export function ProductTable({
               <TableSkeleton />
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7}>
+                <td colSpan={8}>
                   <EmptyState
                     onReset={() => {
                       setSearch("");
@@ -408,6 +413,21 @@ export function ProductTable({
                         {p.leadTimeDays}d lead<span className="sr-only"> time</span>
                       </div>
                     </td>
+                    <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link
+                            to="/bom/$productId"
+                            params={{ productId: p.id }}
+                            aria-label={`View manufacturing BOM for ${p.name}`}
+                            className="focus-ring inline-flex items-center gap-1 rounded-md p-1.5 text-muted-foreground/60 transition-colors hover:bg-accent-soft hover:text-accent"
+                          >
+                            <ListTree className="size-3.5" aria-hidden="true" />
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">View manufacturing BOM</TooltipContent>
+                      </Tooltip>
+                    </td>
                   </tr>
                 );
               })
@@ -509,6 +529,9 @@ function TableSkeleton() {
           </td>
           <td className="px-5 py-3.5">
             <Skeleton className="ml-auto h-4 w-20 rounded-full" />
+          </td>
+          <td className="px-3 py-3.5">
+            <Skeleton className="size-6 rounded-md" />
           </td>
         </tr>
       ))}
