@@ -93,16 +93,82 @@ export function calculateDiscount({
   const netTotal = netUnitPrice * units * termMonths;
 
   // Confidence reflects historical sample size, supply certainty and how
-  // close the quote sits to the margin floor.
+  // close the quote sits to the margin floor. Mirrors backend/app/discount.py —
+  // each signal that moves the score records why, so the UI never has to guess.
   let score = 55;
-  if (segmentRule.sampleSize > 200) score += 20;
-  else if (segmentRule.sampleSize > 100) score += 12;
-  else score += 4;
-  if (tier) score += 14;
-  if (product.availability === "in-stock") score += 10;
-  else if (product.availability === "backorder") score -= 12;
+  const confidenceFactors: DiscountQuote["confidenceFactors"] = [];
+  const segmentText = segment.replace("-", " ");
+
+  if (segmentRule.sampleSize > 200) {
+    score += 20;
+    confidenceFactors.push({
+      label: "Deep deal history",
+      detail: `${segmentRule.sampleSize} closed ${segmentText} deals back this rate`,
+      direction: "up",
+    });
+  } else if (segmentRule.sampleSize > 100) {
+    score += 12;
+    confidenceFactors.push({
+      label: "Moderate deal history",
+      detail: `${segmentRule.sampleSize} comparable ${segmentText} deals on record`,
+      direction: "up",
+    });
+  } else {
+    score += 4;
+    confidenceFactors.push({
+      label: "Thin deal history",
+      detail: `Only ${segmentRule.sampleSize} comparable ${segmentText} deals to reference`,
+      direction: "down",
+    });
+  }
+
+  if (tier) {
+    score += 14;
+    confidenceFactors.push({
+      label: "Exact rate card match",
+      detail: `Hits the published ${tier.label} tier at ${tier.minUnits}+ units`,
+      direction: "up",
+    });
+  } else {
+    confidenceFactors.push({
+      label: "No commit tier matched",
+      detail: "Priced off segment and region rules alone — no published tier applies",
+      direction: "down",
+    });
+  }
+
+  if (product.availability === "in-stock") {
+    score += 10;
+    confidenceFactors.push({
+      label: "Supply confirmed",
+      detail: `In stock, ${product.leadTimeDays}-day lead time`,
+      direction: "up",
+    });
+  } else if (product.availability === "backorder") {
+    score -= 12;
+    confidenceFactors.push({
+      label: "On backorder",
+      detail: `${product.leadTimeDays}-day lead time puts the quote date at risk`,
+      direction: "down",
+    });
+  } else {
+    confidenceFactors.push({
+      label: "Supply constrained",
+      detail: `${product.leadTimeDays}-day lead time — allocation not guaranteed`,
+      direction: "down",
+    });
+  }
+
   const marginPercent = 100 - product.marginFloorPercent - discountPercent;
-  if (marginPercent < 5) score -= 18;
+  if (marginPercent < 5) {
+    score -= 18;
+    confidenceFactors.push({
+      label: "Close to margin floor",
+      detail: `Only ${marginPercent.toFixed(1)}% headroom above the ${product.marginFloorPercent}% floor`,
+      direction: "down",
+    });
+  }
+
   score = Math.max(12, Math.min(97, score));
 
   const confidence = score >= 78 ? "high" : score >= 55 ? "medium" : "low";
@@ -123,6 +189,7 @@ export function calculateDiscount({
     marginPercent: +marginPercent.toFixed(1),
     requiresApproval: discountPercent > 20 || marginPercent < 6,
     rules,
+    confidenceFactors,
   };
 }
 

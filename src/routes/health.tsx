@@ -85,7 +85,6 @@ function HealthPage() {
             Refresh now
           </button>
         }
-
       />
       <main className="mx-auto w-full max-w-[1500px] flex-1 px-6 py-6 lg:px-8">
         <Suspense fallback={<HealthSkeleton />}>
@@ -167,18 +166,27 @@ function HealthContent() {
             <caption className="sr-only">Per-service status, p50 latency and error rate</caption>
             <thead>
               <tr className="border-b border-border bg-surface-muted/70">
-                <th scope="col" className="px-6 py-2.5 text-left text-eyebrow">Service</th>
-                <th scope="col" className="px-4 py-2.5 text-left text-eyebrow">Status</th>
-                <th scope="col" className="px-4 py-2.5 text-right text-eyebrow">Latency</th>
-                <th scope="col" className="px-6 py-2.5 text-right text-eyebrow">Error rate</th>
+                <th scope="col" className="px-6 py-2.5 text-left text-eyebrow">
+                  Service
+                </th>
+                <th scope="col" className="px-4 py-2.5 text-left text-eyebrow">
+                  Status
+                </th>
+                <th scope="col" className="px-4 py-2.5 text-right text-eyebrow">
+                  Latency
+                </th>
+                <th scope="col" className="px-6 py-2.5 text-right text-eyebrow">
+                  Error rate
+                </th>
               </tr>
             </thead>
 
             <tbody>
-              {data.services.map((s) => (
+              {data.services.map((s, rowIndex) => (
                 <tr
                   key={s.name}
-                  className="border-b border-border/70 transition-colors last:border-0 hover:bg-surface-muted"
+                  style={{ animationDelay: `${rowIndex * 30}ms` }}
+                  className="row-enter border-b border-border/70 transition-colors last:border-0 hover:bg-surface-muted"
                 >
                   <td className="px-6 py-3 font-mono text-[0.75rem] font-medium text-foreground">
                     {s.name}
@@ -218,13 +226,14 @@ function HealthContent() {
             </Badge>
           </div>
           <ul className="divide-y divide-border/70">
-            {data.incidents.map((e) => {
+            {data.incidents.map((e, rowIndex) => {
               const Icon =
                 e.level === "error" ? AlertTriangle : e.level === "warn" ? CircleAlert : Info;
               return (
                 <li
                   key={e.id}
-                  className="flex gap-3 px-6 py-3.5 transition-colors hover:bg-surface-muted"
+                  style={{ animationDelay: `${rowIndex * 40}ms` }}
+                  className="row-enter flex gap-3 px-6 py-3.5 transition-colors hover:bg-surface-muted"
                 >
                   <Icon
                     aria-hidden="true"
@@ -249,7 +258,6 @@ function HealthContent() {
                       {e.id} · {new Date(e.at).toLocaleTimeString()}
                     </p>
                   </div>
-
                 </li>
               );
             })}
@@ -283,7 +291,6 @@ function VolumeChart({ series }: { series: HealthSnapshot["series"] }) {
           aria-label="Request volume and errors per minute over the last 60 minutes"
           margin={{ top: 8, right: 8, bottom: 4, left: 8 }}
         >
-
           <defs>
             <linearGradient id="volumeFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.18} />
@@ -379,7 +386,7 @@ function LegendDot({ className, label }: { className: string; label: string }) {
 function StatusPill({ status }: { status: "operational" | "degraded" | "down" }) {
   const map = {
     operational: "bg-success/10 text-success border-success/40",
-    degraded: "bg-warning/15 text-warning-foreground border-warning/50",
+    degraded: "bg-warning/15 text-warning border-warning/50",
     down: "bg-destructive/10 text-destructive border-destructive/40",
   } as const;
   return (
@@ -395,7 +402,6 @@ function StatusPill({ status }: { status: "operational" | "degraded" | "down" })
     </span>
   );
 }
-
 
 function StatCard({
   icon: Icon,
@@ -451,7 +457,6 @@ function StatCard({
           <span className="sr-only">{positive ? "Up " : "Down "}</span>
           {Math.abs(delta)}%
         </span>
-
       </div>
     </div>
   );

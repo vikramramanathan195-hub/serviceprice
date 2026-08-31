@@ -1,4 +1,38 @@
-import type { Category, CustomerSegment, HealthSnapshot, Region, ServerProduct } from "./types";
+import type {
+  Category,
+  CustomerSegment,
+  DealStage,
+  HealthSnapshot,
+  Region,
+  ServerProduct,
+  StakeholderRole,
+} from "./types";
+
+export const DEAL_STAGE_LABELS: Record<DealStage, string> = {
+  discovery: "Discovery",
+  "technical-validation": "Technical Validation",
+  "bom-finalized": "BOM Finalized",
+  "pricing-approval": "Pricing Approval",
+  contract: "Contract",
+  "closed-won": "Closed Won",
+  "closed-lost": "Closed Lost",
+};
+
+export const DEAL_STAGE_ORDER: DealStage[] = [
+  "discovery",
+  "technical-validation",
+  "bom-finalized",
+  "pricing-approval",
+  "contract",
+  "closed-won",
+];
+
+export const STAKEHOLDER_ROLE_LABELS: Record<StakeholderRole, string> = {
+  "senior-leadership": "Senior Leadership",
+  "country-head-sales": "Country Head / Sales",
+  "manufacturing-rd": "Manufacturing / R&D",
+  "external-partner": "External Partner",
+};
 
 export const REGION_LABELS: Record<Region, string> = {
   "us-east": "US East (Ashburn)",

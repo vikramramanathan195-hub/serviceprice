@@ -46,7 +46,12 @@ const ROWS: RowDef[] = [
     better: "low",
     emphasis: true,
   },
-  { label: "vCPU", value: (p) => (p.vcpu ? `${p.vcpu}` : "—"), rank: (p) => p.vcpu, better: "high" },
+  {
+    label: "vCPU",
+    value: (p) => (p.vcpu ? `${p.vcpu}` : "—"),
+    rank: (p) => p.vcpu,
+    better: "high",
+  },
   { label: "Memory", value: (p) => `${p.memoryGb} GB`, rank: (p) => p.memoryGb, better: "high" },
   {
     label: "Storage",
@@ -99,7 +104,7 @@ export function CompareDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[72vh] overflow-auto">
+        <div className="scroll-slim max-h-[72vh] overflow-auto">
           <table className="w-full border-collapse text-[0.8125rem]">
             <thead className="sticky top-0 z-10 bg-surface-muted">
               <tr>
@@ -161,19 +166,25 @@ export function CompareDialog({
                           <span className="inline-flex items-center gap-1.5">
                             {isBest && (
                               <>
-                                <Check className="size-3.5 text-accent" strokeWidth={2.6} aria-hidden="true" />
+                                <Check
+                                  className="size-3.5 text-accent"
+                                  strokeWidth={2.6}
+                                  aria-hidden="true"
+                                />
                                 <span className="sr-only">Best value: </span>
                               </>
                             )}
                             {allSame && (
                               <>
-                                <Minus className="size-3 text-muted-foreground/60" aria-hidden="true" />
+                                <Minus
+                                  className="size-3 text-muted-foreground/60"
+                                  aria-hidden="true"
+                                />
                                 <span className="sr-only">Identical across SKUs: </span>
                               </>
                             )}
                             {row.value(p)}
                           </span>
-
                         </td>
                       );
                     })}

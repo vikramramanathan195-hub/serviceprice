@@ -5,7 +5,6 @@ import {
   ChevronUp,
   Columns3,
   GitCompareArrows,
-  PackageSearch,
   Search,
   SlidersHorizontal,
   X,
@@ -26,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { CATEGORY_LABELS, REGION_LABELS, REGION_SHORT } from "@/lib/serverprice/data";
 import { currency } from "@/lib/serverprice/discount";
 import type { Category, Region, ServerProduct } from "@/lib/serverprice/types";
+import { RackMark } from "@/components/rack-mark";
 import { useDialogTrigger } from "@/hooks/use-dialog-trigger";
 import { cn } from "@/lib/utils";
 import { CompareDialog } from "./compare-dialog";
@@ -34,7 +34,7 @@ type SortKey = "name" | "category" | "region" | "basePrice" | "discount";
 
 const AVAILABILITY_STYLE = {
   "in-stock": "border-success/25 bg-success/10 text-success",
-  constrained: "border-warning/40 bg-warning/15 text-warning-foreground",
+  constrained: "border-warning/40 bg-warning/15 text-warning",
   backorder: "border-destructive/25 bg-destructive/10 text-destructive",
 } as const;
 
@@ -173,7 +173,6 @@ export function ProductTable({
             </SelectContent>
           </Select>
 
-
           {filtersActive && (
             <button
               type="button"
@@ -229,11 +228,10 @@ export function ProductTable({
             </TooltipContent>
           </Tooltip>
         </div>
-
       </div>
 
       {/* Table ----------------------------------------------------- */}
-      <div className="overflow-x-auto">
+      <div className="scroll-slim overflow-x-auto">
         <table className="w-full min-w-[960px] border-collapse">
           <caption className="sr-only">
             Server SKU catalog — sortable by product, category, region, base price and discount
@@ -283,7 +281,6 @@ export function ProductTable({
               <th scope="col" className="px-5 py-2.5 text-right text-eyebrow">
                 Availability
               </th>
-
             </tr>
           </thead>
           <tbody>
@@ -303,15 +300,16 @@ export function ProductTable({
                 </td>
               </tr>
             ) : (
-              filtered.map((p) => {
+              filtered.map((p, rowIndex) => {
                 const isSelected = selected.includes(p.id);
                 const atLimit = !isSelected && selected.length >= 4;
                 return (
                   <tr
                     key={p.id}
                     onClick={() => !atLimit && toggleRow(p.id)}
+                    style={{ animationDelay: `${Math.min(rowIndex * 25, 400)}ms` }}
                     className={cn(
-                      "group cursor-pointer border-b border-border/70 transition-colors duration-150 last:border-0",
+                      "row-enter group cursor-pointer border-b border-border/70 transition-colors duration-150 last:border-0",
                       isSelected
                         ? "bg-accent-soft/50 hover:bg-accent-soft/70"
                         : "hover:bg-surface-muted",
@@ -410,7 +408,6 @@ export function ProductTable({
                         {p.leadTimeDays}d lead<span className="sr-only"> time</span>
                       </div>
                     </td>
-
                   </tr>
                 );
               })
@@ -483,7 +480,6 @@ function SortHeader({
   );
 }
 
-
 function TableSkeleton() {
   return (
     <>
@@ -523,8 +519,8 @@ function TableSkeleton() {
 function EmptyState({ onReset, query }: { onReset: () => void; query: string }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-      <div className="flex size-11 items-center justify-center rounded-lg border border-dashed border-border-strong bg-surface-muted text-muted-foreground">
-        <PackageSearch className="size-5" strokeWidth={1.8} />
+      <div className="flex size-12 items-center justify-center rounded-lg border border-dashed border-border-strong bg-surface-muted">
+        <RackMark />
       </div>
       <h3 className="mt-3 text-[0.9375rem] font-semibold text-foreground">
         No SKUs match these filters
