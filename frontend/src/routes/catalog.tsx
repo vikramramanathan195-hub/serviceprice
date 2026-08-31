@@ -7,10 +7,16 @@ import { RoleGate } from "@/components/role-gate";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DiscountCalculator } from "@/components/pricing/discount-calculator";
+import { MarginValidator } from "@/components/pricing/margin-validator";
 import { ExportCatalogDialog } from "@/components/pricing/export-catalog-dialog";
 import { ProductTable } from "@/components/pricing/product-table";
 import { currency } from "@/lib/serverprice/discount";
-import { productsQueryOptions } from "@/lib/serverprice/queries";
+import {
+  marginCustomersQueryOptions,
+  marginMetaQueryOptions,
+  marginPortfoliosQueryOptions,
+  productsQueryOptions,
+} from "@/lib/serverprice/queries";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/catalog")({
@@ -31,7 +37,12 @@ export const Route = createFileRoute("/catalog")({
     ],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(productsQueryOptions());
+    await Promise.all([
+      context.queryClient.ensureQueryData(productsQueryOptions()),
+      context.queryClient.ensureQueryData(marginPortfoliosQueryOptions()),
+      context.queryClient.ensureQueryData(marginCustomersQueryOptions()),
+      context.queryClient.ensureQueryData(marginMetaQueryOptions()),
+    ]);
   },
   component: PricingDashboard,
   errorComponent: ({ error }) => (
@@ -122,6 +133,8 @@ function PricingDashboard() {
           <ProductTable products={products} isLoading={isLoading} />
 
           <DiscountCalculator products={products} />
+
+          <MarginValidator />
         </main>
       </RoleGate>
 

@@ -12,10 +12,15 @@ import { calculateDiscount } from "./discount";
 import type {
   CustomerSegment,
   Deal,
+  DealMarginCalcRequest,
+  DealMarginCalcResponse,
   DealStage,
   DealSummary,
   DiscountQuote,
   HealthSnapshot,
+  MarginCustomer,
+  MarginMeta,
+  MarginPortfolio,
   ProductBom,
   Region,
   ServerProduct,
@@ -168,6 +173,24 @@ export const api = {
 
   removeBomItem: (id: string, itemId: string) =>
     request<Deal>(`/deals/${id}/bom/${itemId}`, { method: "DELETE" }, backendRequired),
+
+  // Margin-based deal validation — a standalone tool, no offline fallback
+  // (same reasoning as the deal/BOM endpoints above: no meaningful fake
+  // dataset for a live pricing-desk decision).
+  listMarginPortfolios: () =>
+    request<MarginPortfolio[]>("/api/deals/portfolios", undefined, backendRequired),
+
+  listMarginCustomers: () =>
+    request<MarginCustomer[]>("/api/deals/customers", undefined, backendRequired),
+
+  getMarginMeta: () => request<MarginMeta>("/api/deals/meta", undefined, backendRequired),
+
+  calculateDealMargin: (payload: DealMarginCalcRequest) =>
+    request<DealMarginCalcResponse>(
+      "/api/deals/calculate",
+      { method: "POST", body: JSON.stringify(payload) },
+      backendRequired,
+    ),
 };
 
 function backendRequired(): never {
@@ -181,4 +204,7 @@ export const queryKeys = {
   deals: (filters: unknown) => ["deals", filters] as const,
   deal: (id: string) => ["deal", id] as const,
   productBom: (productId: string) => ["product-bom", productId] as const,
+  marginPortfolios: ["margin-portfolios"] as const,
+  marginCustomers: ["margin-customers"] as const,
+  marginMeta: ["margin-meta"] as const,
 };

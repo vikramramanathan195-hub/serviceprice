@@ -232,3 +232,93 @@ class StakeholderSignoffRequest(BaseModel):
 
 class StageChangeRequest(BaseModel):
     stage: DealStage
+
+
+# --------------------------------------------------------------------------
+# Margin-based deal validation — a standalone tool distinct from the
+# per-SKU discount calculator above. Prices multi-line service portfolios
+# (not physical hardware SKUs) and grades the requested discount on each
+# line against a 5-band margin-erosion scale.
+# --------------------------------------------------------------------------
+
+Channel = Literal["direct", "indirect"]
+
+DealMotion = Literal["new-business", "renewal", "expansion", "displacement"]
+
+RiskRating = Literal["Good", "Fair", "Weak", "Poor"]
+
+
+class MarginPortfolio(BaseModel):
+    id: str
+    name: str
+    grossMarginPercent: float = Field(ge=0, lt=100)
+    costOfSalesPercent: float = Field(ge=0, lt=100)
+
+
+class MarginCustomer(BaseModel):
+    id: str
+    name: str
+    region: Region
+
+
+class BandTier(BaseModel):
+    tier: str
+    maxDiscountPercent: float
+
+
+class MarginLineRequest(BaseModel):
+    portfolioId: str = Field(min_length=1)
+    channel: Channel
+    grossOrderValueUsd: float = Field(gt=0)
+    requestedDiscountPercent: float = Field(ge=0, le=100)
+
+
+class MarginLineResult(BaseModel):
+    portfolioId: str
+    portfolioName: str
+    channel: Channel
+    grossOrderValueUsd: float
+    requestedDiscountPercent: float
+    netOrderValueUsd: float
+    band: list[BandTier]
+    rating: RiskRating
+    historicalDiscountPercent: float | None
+    previousNetOrderUsd: float | None
+
+
+class MarginTotalRow(BaseModel):
+    grossOrderValueUsd: float
+    netOrderValueUsd: float
+    blendedDiscountPercent: float
+    rating: RiskRating
+
+
+class MarginChannelGroup(BaseModel):
+    channel: Channel
+    lines: list[MarginLineResult]
+    total: MarginTotalRow
+
+
+class MarginConfidence(BaseModel):
+    score: int
+    level: Literal["high", "medium", "low"]
+    factors: list[ConfidenceFactor]
+
+
+class DealMarginCalcRequest(BaseModel):
+    customerId: str = Field(min_length=1)
+    region: Region
+    dealMotion: list[DealMotion] = Field(min_length=1)
+    fiscalPeriod: str = Field(min_length=1)
+    lines: list[MarginLineRequest] = Field(min_length=1)
+
+
+class DealMarginCalcResponse(BaseModel):
+    customerId: str
+    customerName: str
+    region: Region
+    fiscalPeriod: str
+    dealMotion: list[DealMotion]
+    channelGroups: list[MarginChannelGroup]
+    grandTotal: MarginTotalRow
+    confidence: MarginConfidence

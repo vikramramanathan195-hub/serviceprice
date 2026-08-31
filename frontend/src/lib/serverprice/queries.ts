@@ -39,3 +39,24 @@ export const productBomQueryOptions = (productId: string) =>
     queryFn: () => api.getProductBom(productId),
     staleTime: 60_000,
   });
+
+export const marginPortfoliosQueryOptions = () =>
+  queryOptions({
+    queryKey: queryKeys.marginPortfolios,
+    queryFn: () => api.listMarginPortfolios(),
+    staleTime: 60_000,
+  });
+
+export const marginCustomersQueryOptions = () =>
+  queryOptions({
+    queryKey: queryKeys.marginCustomers,
+    queryFn: () => api.listMarginCustomers(),
+    staleTime: 60_000,
+  });
+
+export const marginMetaQueryOptions = () =>
+  queryOptions({
+    queryKey: queryKeys.marginMeta,
+    queryFn: () => api.getMarginMeta(),
+    staleTime: 60_000,
+  });

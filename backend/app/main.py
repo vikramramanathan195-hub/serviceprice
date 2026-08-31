@@ -9,15 +9,28 @@ from app.component_data import COMPONENTS_BY_PRODUCT
 from app.data import PRODUCTS, PRODUCTS_BY_ID
 from app.deals_data import DEALS_BY_ID
 from app.discount import calculate_discount
+from app.margin import calculate_deal_margin
+from app.margin_data import (
+    DEAL_MOTION_LABELS,
+    FISCAL_PERIODS,
+    MARGIN_CUSTOMERS,
+    MARGIN_CUSTOMERS_BY_ID,
+    PORTFOLIOS,
+    PORTFOLIOS_BY_ID,
+)
 from app.models import (
     DEAL_STAGE_ORDER,
     AddBomItemRequest,
     BomLineItem,
     Category,
     Deal,
+    DealMarginCalcRequest,
+    DealMarginCalcResponse,
     DealStage,
     DealSummary,
     DiscountQuote,
+    MarginCustomer,
+    MarginPortfolio,
     ProductBom,
     QuoteRequest,
     Region,
@@ -166,6 +179,38 @@ def _summarize(deal: Deal) -> DealSummary:
 @app.get("/health")
 async def health() -> dict:
     return {"status": "ok"}
+
+
+# --------------------------------------------------------------------------
+# Margin-based deal validation — standalone from the per-SKU quote flow above.
+# --------------------------------------------------------------------------
+
+
+@app.get("/api/deals/portfolios", response_model=list[MarginPortfolio])
+async def list_margin_portfolios() -> list[MarginPortfolio]:
+    return PORTFOLIOS
+
+
+@app.get("/api/deals/customers", response_model=list[MarginCustomer])
+async def list_margin_customers() -> list[MarginCustomer]:
+    return MARGIN_CUSTOMERS
+
+
+@app.get("/api/deals/meta")
+async def get_margin_meta() -> dict:
+    return {"fiscalPeriods": FISCAL_PERIODS, "dealMotions": DEAL_MOTION_LABELS}
+
+
+@app.post("/api/deals/calculate", response_model=DealMarginCalcResponse)
+async def calculate_deal_margin_endpoint(req: DealMarginCalcRequest) -> DealMarginCalcResponse:
+    if req.customerId not in MARGIN_CUSTOMERS_BY_ID:
+        raise HTTPException(status_code=404, detail=f"No customer found with id '{req.customerId}'")
+    for line in req.lines:
+        if line.portfolioId not in PORTFOLIOS_BY_ID:
+            raise HTTPException(
+                status_code=404, detail=f"No portfolio found with id '{line.portfolioId}'"
+            )
+    return calculate_deal_margin(req)
 
 
 # --------------------------------------------------------------------------

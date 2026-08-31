@@ -169,6 +169,97 @@ export interface Deal {
   bomLockReason: string | null;
 }
 
+/* ------------------------------------------------------------------ */
+/* Margin-based deal validation                                        */
+/* ------------------------------------------------------------------ */
+
+export type Channel = "direct" | "indirect";
+
+export type DealMotion = "new-business" | "renewal" | "expansion" | "displacement";
+
+export type RiskRating = "Good" | "Fair" | "Weak" | "Poor";
+
+export interface MarginPortfolio {
+  id: string;
+  name: string;
+  grossMarginPercent: number;
+  costOfSalesPercent: number;
+}
+
+export interface MarginCustomer {
+  id: string;
+  name: string;
+  region: Region;
+}
+
+export interface BandTier {
+  tier: string;
+  maxDiscountPercent: number;
+}
+
+export interface MarginLineInput {
+  portfolioId: string;
+  channel: Channel;
+  grossOrderValueUsd: number;
+  requestedDiscountPercent: number;
+}
+
+export interface MarginLineResult {
+  portfolioId: string;
+  portfolioName: string;
+  channel: Channel;
+  grossOrderValueUsd: number;
+  requestedDiscountPercent: number;
+  netOrderValueUsd: number;
+  band: BandTier[];
+  rating: RiskRating;
+  historicalDiscountPercent: number | null;
+  previousNetOrderUsd: number | null;
+}
+
+export interface MarginTotalRow {
+  grossOrderValueUsd: number;
+  netOrderValueUsd: number;
+  blendedDiscountPercent: number;
+  rating: RiskRating;
+}
+
+export interface MarginChannelGroup {
+  channel: Channel;
+  lines: MarginLineResult[];
+  total: MarginTotalRow;
+}
+
+export interface MarginConfidence {
+  score: number;
+  level: "high" | "medium" | "low";
+  factors: ConfidenceFactor[];
+}
+
+export interface DealMarginCalcRequest {
+  customerId: string;
+  region: Region;
+  dealMotion: DealMotion[];
+  fiscalPeriod: string;
+  lines: MarginLineInput[];
+}
+
+export interface DealMarginCalcResponse {
+  customerId: string;
+  customerName: string;
+  region: Region;
+  fiscalPeriod: string;
+  dealMotion: DealMotion[];
+  channelGroups: MarginChannelGroup[];
+  grandTotal: MarginTotalRow;
+  confidence: MarginConfidence;
+}
+
+export interface MarginMeta {
+  fiscalPeriods: string[];
+  dealMotions: Record<DealMotion, string>;
+}
+
 export interface HealthSnapshot {
   concurrentUsers: number;
   avgResponseMs: number;
