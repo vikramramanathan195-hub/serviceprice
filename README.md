@@ -1,29 +1,41 @@
-# Welcome to your Lovable project
+# ServerPrice — Deal Desk
 
-This project was built with [Lovable](https://lovable.dev).
+An internal deal management, BOM, and pricing tool: server hardware deals move through a stage
+pipeline, gather stakeholder sign-off, and get priced through a rule-based discount engine.
 
-## Build with Lovable
+## Structure
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+```
+backend/    FastAPI (Python) — deals, BOM, pricing, discount engine
+frontend/   TanStack Start (React/TypeScript) — the web app
+```
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+Each has its own dependencies and is meant to be run (and eventually deployed) independently.
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Backend
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --port 8000 --reload
 ```
+
+Runs at `http://localhost:8000` — interactive API docs at `http://localhost:8000/docs`.
+
+## Frontend
+
+```sh
+cd frontend
+bun install
+bun run dev
+```
+
+Runs at `http://localhost:8080` and expects the backend at `http://localhost:8000`.
 
 ## Built with
 
-- TanStack Start
-- TypeScript
-- React
+- FastAPI, Pydantic
+- TanStack Start, TanStack Router, TanStack Query
+- TypeScript, React
 - Tailwind CSS

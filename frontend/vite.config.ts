@@ -40,7 +40,9 @@ export default defineConfig(async ({ command, mode }) => {
   );
 
   if (command === "build") {
-    plugins.push(nitro({ defaultPreset: "cloudflare-module" }));
+    // Vercel sets NITRO_PRESET=vercel via its build environment; local/CI
+    // builds fall back to cloudflare-module (what we've tested against).
+    plugins.push(nitro({ defaultPreset: process.env.NITRO_PRESET ?? "cloudflare-module" }));
   }
 
   plugins.push(viteReact());

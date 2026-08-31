@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime, timezone
 
@@ -29,13 +30,21 @@ from app.models import (
 
 app = FastAPI(title="ServerPrice Deal Desk API", version="0.2.0")
 
+# Extra allowed origins (e.g. a custom domain) come from a Render env var —
+# comma-separated, set in the Render dashboard once you know the final URL.
+# Vercel preview + prod URLs are covered by the regex below, so they don't
+# need to be listed individually.
+_extra_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8080",
         "http://127.0.0.1:8080",
         "http://localhost:3000",
+        *_extra_origins,
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
