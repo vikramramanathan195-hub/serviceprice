@@ -119,7 +119,11 @@ const THEME_INIT_SCRIPT = `
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // The blocking theme-init script (below) adds a "light" class to this
+    // tag before React hydrates, on purpose, to avoid a flash of the wrong
+    // theme. That intentionally differs from the SSR output, so hydration
+    // must not treat it as an error — hence suppressHydrationWarning here.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
