@@ -452,7 +452,9 @@ function MarginResult({ result }: { result: DealMarginCalcResponse }) {
             <h3 className="text-[0.8125rem] font-semibold text-foreground">
               {multiChannel ? `${CHANNEL_LABELS[group.channel]} channel` : "Deal lines"}
             </h3>
-            <RatingBadge rating={group.total.rating} />
+            {/* Redundant with the line's own badge when a group has just one
+                line — the group rating and that line's rating are identical. */}
+            {group.lines.length > 1 && <RatingBadge rating={group.total.rating} />}
           </div>
 
           <ul className="mt-3 divide-y divide-border/50">
