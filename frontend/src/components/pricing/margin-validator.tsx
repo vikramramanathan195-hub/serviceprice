@@ -522,32 +522,66 @@ function BandBar({
   requested: number;
 }) {
   const max = band.at(-1)?.maxDiscountPercent ?? 1;
-  const markerPct = Math.min(100, (requested / max) * 100);
+  const markerPct = Math.min(100, Math.max(0, (requested / max) * 100));
+  const markerAlign = markerPct < 8 ? "left" : markerPct > 92 ? "right" : "center";
 
   return (
-    <div className="mt-2.5">
-      <div className="relative flex h-2 overflow-hidden rounded-full">
+    <div className="mt-4 pt-5">
+      <div className="relative">
+        {/* Marker callout — sits above the bar, clamped so it never clips the edges. */}
+        <div
+          className="absolute bottom-full mb-1.5 flex -translate-x-1/2 flex-col items-center"
+          style={{
+            left: `${markerPct}%`,
+            transform:
+              markerAlign === "left"
+                ? "translateX(0%)"
+                : markerAlign === "right"
+                  ? "translateX(-100%)"
+                  : "translateX(-50%)",
+          }}
+        >
+          <span className="whitespace-nowrap rounded-md border border-border-strong bg-surface px-1.5 py-0.5 text-[0.6875rem] font-semibold tabular text-foreground shadow-card">
+            Requested {requested.toFixed(1)}%
+          </span>
+          <span className="mt-0.5 h-2 w-px bg-foreground/70" aria-hidden="true" />
+        </div>
+
+        <div className="relative flex h-3.5 overflow-hidden rounded-md ring-1 ring-border">
+          {band.map((tier, i) => {
+            const prevMax = i === 0 ? 0 : (band[i - 1]?.maxDiscountPercent ?? 0);
+            const width = ((tier.maxDiscountPercent - prevMax) / max) * 100;
+            return (
+              <div
+                key={tier.tier}
+                className={cn(i > 0 && "border-l border-background/60")}
+                style={{ width: `${width}%`, backgroundColor: tierColor(i, band.length) }}
+                title={`${tier.tier} — up to ${tier.maxDiscountPercent}%`}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-1.5 flex">
         {band.map((tier, i) => {
           const prevMax = i === 0 ? 0 : (band[i - 1]?.maxDiscountPercent ?? 0);
           const width = ((tier.maxDiscountPercent - prevMax) / max) * 100;
           return (
             <div
               key={tier.tier}
-              style={{ width: `${width}%`, backgroundColor: tierColor(i, band.length) }}
-              title={`${tier.tier} — up to ${tier.maxDiscountPercent}%`}
-            />
+              style={{ width: `${width}%` }}
+              className="min-w-0 text-center first:text-left last:text-right"
+            >
+              <div className="truncate text-[0.6875rem] font-medium text-foreground/80">
+                {tier.tier}
+              </div>
+              <div className="tabular text-[0.6875rem] text-muted-foreground">
+                ≤{tier.maxDiscountPercent}%
+              </div>
+            </div>
           );
         })}
-        <div
-          className="absolute top-1/2 h-3 w-[2px] -translate-y-1/2 bg-foreground"
-          style={{ left: `${markerPct}%` }}
-          aria-hidden="true"
-        />
-      </div>
-      <div className="mt-1 flex justify-between text-[0.6875rem] text-muted-foreground">
-        {band.map((tier) => (
-          <span key={tier.tier}>{tier.tier}</span>
-        ))}
       </div>
     </div>
   );
